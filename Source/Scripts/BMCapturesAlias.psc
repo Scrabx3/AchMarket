@@ -34,9 +34,9 @@ Function ForceRefTo(ObjectReference akNewRef)
   If (_ogLocation)
     _data[4] = _ogLocation.GetName()
   Else
-    _data[5] = "Wilderness"
+    _data[4] = "Wilderness"
   EndIf
-  _data[6] = Captures.CreateGameTimeString()
+  _data[5] = Captures.CreateGameTimeString()
 
   Parent.ForceRefTo(akNewRef)
 EndFunction
