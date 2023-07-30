@@ -29,5 +29,5 @@ EndEvent
 
 ; Remove Actor from Captured Aliases
 Function Stage100()
-  Captures.RemoveCapture(Target.GetReference() as Actor)
+  Captures.Imprison(Target.GetReference() as Actor)
 EndFunction

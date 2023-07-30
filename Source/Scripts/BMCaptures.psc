@@ -1,6 +1,7 @@
 ScriptName BMCaptures extends Quest
 
 BMCapturesAlias[] Property CaptureRefs Auto
+BMPrisonerAlias[] Property PrisonerRefs Auto
 ObjectReference Property HoldingCellMarker Auto
 Actor Property PlayerRef Auto
 
@@ -23,13 +24,20 @@ GlobalVariable Property GameHour Auto
 
 String Property CaptureOptionID = "AchBM_CAPTURE" AutoReadOnly
 
+int Property CAPTURES_NONE = 0 AutoReadOnly
+int Property CAPTURES_FREESELECT = 1 AutoReadOnly
+int Property CAPTURES_SELLSELECT = 2 AutoReadOnly
+int _CapturesMode
+
 ; Called on every game load
 Function Maintenance()
   Debug.Trace("[BlackMarket] Captures Maintenance")
   If (!Acheron.HasOption(CaptureOptionID))
-    Acheron.AddOption(CaptureOptionID, "Capture", "BlackMarket\\Captures.swf{0}", "{\"Target\":{\"NOT\":{\"Keywords\":[\"0x952C07|AchBlackMarket.esp\",\"0x952C05|AchBlackMarket.esp\"]},\"IS\":[\"NonEssential\"]}}")
+    Acheron.AddOption(CaptureOptionID, "Capture", "AchMarket_CaptureIcon.swf", "{\"Target\":{\"NOT\":{\"Keywords\":[\"0x952C07|AchBlackMarket.esp\",\"0x952C05|AchBlackMarket.esp\"]},\"IS\":[\"NonEssential\"]}}")
   EndIf
   Acheron.RegisterForHunterPrideSelect(self)
+  RegisterForModEvent("AchMarket_SELECT", "OnCaptureSelect")
+  RegisterForModEvent("AchMarket_CANCEL", "OnCaptureCancel")
   RegisterForKey(35)
 EndFunction
 
@@ -41,20 +49,44 @@ Event OnHunterPrideSelect(int aiOptionID, Actor akTarget)
 EndEvent
 
 Event OnKeyDown(int keyCode)
+  If(Utility.IsInMenuMode() || !Game.IsLookingControlsEnabled())
+		return
+  EndIf
+  _CapturesMode = CAPTURES_FREESELECT
   OpenCapturesMenu()
 EndEvent
+
+Function SellCaptureSelect()
+  _CapturesMode = CAPTURES_SELLSELECT
+  OpenCapturesMenu()
+EndFunction
 
 Function OpenCapturesMenu()
   UI.OpenCustomMenu("AchMarketCapturesMenu")
   int i = 0
   While (i < CaptureRefs.Length)
     If (CaptureRefs[i].GetReference())
-      UI.InvokeStringA("CustomMenu", "_root.main.AddOption", CaptureRefs[i].GetMenuData())
+      UI.InvokeStringA("CustomMenu", "_root.main.SetData", CaptureRefs[i].GetMenuData())
     EndIf
     i += 1
   EndWhile
-  UI.Invoke("CustomMenu", "_root.main.OpenMenu")
 EndFunction
+
+Event OnCaptureSelect(string asEventName, string asAliasID, float afNumArg, form akSender)
+  BMCapturesAlias select = GetAlias(asAliasID as int) as BMCapturesAlias
+  If (!select)
+    Debug.TraceStack("[BlackMarket] Invalid SelectionID")
+  ElseIf (_CapturesMode == CAPTURES_FREESELECT)
+    LoadCapture(select.GetActorReference())
+  ElseIf (_CapturesMode == CAPTURES_SELLSELECT)
+    SellCapture(select)
+  EndIf
+  _CapturesMode = CAPTURES_NONE
+EndEvent
+
+Event OnCaptureCancel(string asEventName, string asStringArg, float afNumArg, form akSender)
+  _CapturesMode = CAPTURES_NONE
+EndEvent
 
 ; ======================
 ; ======== STORE & LOAD
@@ -121,6 +153,25 @@ bool Function RemoveCapture(Actor akTarget)
     i += 1
   EndWhile
   return true
+EndFunction
+
+Function SellCapture(BMCapturesAlias akSellRef)
+  ; TODO: Implement
+  Imprison(akSellRef.GetActorReference())
+EndFunction
+
+Function Imprison(Actor akPrisoner)
+  If(!RemoveCapture(akPrisoner))
+    return
+  EndIf
+  int i = 0
+  While(i < PrisonerRefs.Length)
+    If (PrisonerRefs[i].ForceRefIfEmpty(akPrisoner))
+      return
+    EndIf
+    i += 1
+  EndWhile
+  Debug.Trace("[BlackMarket] Actor " + akPrisoner + " cannot be imprisoned. No cells are available")
 EndFunction
 
 ; ======================
