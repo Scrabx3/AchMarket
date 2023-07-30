@@ -133,6 +133,7 @@ bool Function LoadCapture(Actor akTarget)
   Debug.SendAnimationEvent(akTarget, "BleedoutStart")
   Utility.Wait(0.4)
   FadeToBlackHoldImod.PopTo(FadeToBlackBackFastImod)
+  RemoveCaptureImpl(ref)
 EndFunction
 
 bool Function RemoveCapture(Actor akTarget)
@@ -141,18 +142,19 @@ bool Function RemoveCapture(Actor akTarget)
     Debug.TraceStack("[BlackMarket] Actor " + akTarget + " is not captured.")
     return false
   EndIf
-  ref.Clear()
+  RemoveCaptureImpl(ref)
+EndFunction
+
+Function RemoveCaptureImpl(BMCapturesAlias akAlias)
+  akAlias.Clear()
   ; Shift the ref to be cleared to the end of array to make re-using references
   ; more consistent in the menu (always listing older captures before new ones)
-  int i = CaptureRefs.Find(ref)
-  While(i < CaptureRefs.Length - 1)
-    If (!CaptureRefs[i + 1].GetReference())
-      return true
-    EndIf
-    CaptureRefs[i + 1] = CaptureRefs[i]
+  int i = CaptureRefs.Find(akAlias)
+  While(i < CaptureRefs.Length - 1 && CaptureRefs[i + 1].GetReference())
+    CaptureRefs[i] = CaptureRefs[i + 1]
     i += 1
   EndWhile
-  return true
+  CaptureRefs[i] = akAlias
 EndFunction
 
 Function SellCapture(BMCapturesAlias akSellRef)
@@ -243,6 +245,6 @@ String Function CreateGameTimeString()
   ret += hour + ":"
   float minute = (GameHour.Value - hour)
   ret += (minute * 60) as int
-  Debug.Trace("[BlackMarket] Returning Date = " + ret)
+  ; Debug.Trace("[BlackMarket] Returning Date = " + ret)
   return ret
 EndFunction

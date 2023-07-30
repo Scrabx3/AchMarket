@@ -13,7 +13,7 @@ String[] _data
 String[] Function GetMenuData()
   String[] data = Utility.ResizeStringArray(_data, _data.Length + 1, "0")
   If (GetReference().HasKeyword(Captures.MarketTargetKW))
-    data[5] = "1"
+    data[6] = "1"
   EndIf
   return data
 EndFunction
