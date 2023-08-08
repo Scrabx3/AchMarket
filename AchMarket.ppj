@@ -36,13 +36,14 @@
     </Folders>
     <ZipFiles Output="@Rel">
         <ZipFile Name="@ModName - @Ver" RootDir="@ThisProject" Compression="deflate">
-        	<Include NoRecurse="true">YameteKudasai.esp</Include>
+        	<Include NoRecurse="true">AchMarket.esp</Include>
             <Include>Interface</Include>
             <Include>meshes</Include>
             <Include>Scripts</Include>
             <Include>Seq</Include>
             <Include>SKSE</Include>
             <Include>Source</Include>
+            <Include>textures</Include>
         </ZipFile>
     </ZipFiles>
 </PapyrusProject>
