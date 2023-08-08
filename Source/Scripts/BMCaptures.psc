@@ -1,4 +1,4 @@
-ScriptName BMCaptures extends Quest
+ScriptName BMCaptures extends Quest Conditional
 
 BMCapturesAlias[] Property CaptureRefs Auto
 BMPrisonerAlias[] Property PrisonerRefs Auto
@@ -18,6 +18,9 @@ GlobalVariable Property GameMonth Auto
 GlobalVariable Property GameYear Auto
 GlobalVariable Property GameHour Auto
 
+Keyword Property SMReservecCheckRef Auto
+MiscObject Property Gold001 Auto
+
 ; ======================
 ; ======== INTERFACE
 ; ======================
@@ -29,6 +32,8 @@ int Property CAPTURES_FREESELECT = 1 AutoReadOnly
 int Property CAPTURES_SELLSELECT = 2 AutoReadOnly
 int _CapturesMode
 
+int _CapturesModifierKey
+
 ; Called on every game load
 Function Maintenance()
   Debug.Trace("[BlackMarket] Captures Maintenance")
@@ -38,7 +43,12 @@ Function Maintenance()
   Acheron.RegisterForHunterPrideSelect(self)
   RegisterForModEvent("AchMarket_SELECT", "OnCaptureSelect")
   RegisterForModEvent("AchMarket_CANCEL", "OnCaptureCancel")
-  RegisterForKey(35)
+
+  UnregisterForAllKeys()
+  int jObj = JValue.readFromFile("Data\\SKSE\\AchMarket\\Settings.json")
+  _CapturesModifierKey = JMap.getInt(jObj, "modifier", -1)
+  int keycode = JMap.getInt(jObj, "keycode", 35)
+  RegisterForKey(keycode)
 EndFunction
 
 Event OnHunterPrideSelect(int aiOptionID, Actor akTarget)
@@ -49,8 +59,10 @@ Event OnHunterPrideSelect(int aiOptionID, Actor akTarget)
 EndEvent
 
 Event OnKeyDown(int keyCode)
-  If(Utility.IsInMenuMode() || !Game.IsLookingControlsEnabled())
+  If (Utility.IsInMenuMode() || !Game.IsLookingControlsEnabled())
 		return
+  ElseIf (_CapturesModifierKey > 0 && !Input.IsKeyPressed(_CapturesModifierKey))
+    return
   EndIf
   _CapturesMode = CAPTURES_FREESELECT
   OpenCapturesMenu()
@@ -158,7 +170,12 @@ Function RemoveCaptureImpl(BMCapturesAlias akAlias)
 EndFunction
 
 Function SellCapture(BMCapturesAlias akSellRef)
-  ; TODO: Implement
+  Actor selling = akSellRef.GetActorReference()
+  int price = 50 + selling.GetLevel() * 3
+  If (selling.GetActorBase().IsUnique())
+    price += 1000
+  EndIf
+  PlayerRef.AddItem(Gold001, price)
   Imprison(akSellRef.GetActorReference())
 EndFunction
 
