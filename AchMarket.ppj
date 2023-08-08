@@ -7,7 +7,7 @@
     Package="false"
     Zip="true">
     <Variables>
-        <Variable Name="ModName" Value="Acheron Black Market"/>
+        <Variable Name="ModName" Value="Acheron - The Market"/>
         <Variable Name="ThisProject" Value="."/>
         <Variable Name="Rel" Value=".\.release"/>
         <Variable Name="MO2" Value=".."/>
