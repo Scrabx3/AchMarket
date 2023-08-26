@@ -38,7 +38,7 @@ int _CapturesModifierKey
 Function Maintenance()
   Debug.Trace("[BlackMarket] Captures Maintenance")
   If (!Acheron.HasOption(CaptureOptionID))
-    Acheron.AddOption(CaptureOptionID, "Capture", "AchMarket_CaptureIcon.swf", "{\"Target\":{\"NOT\":{\"Keywords\":[\"0x952C07|AchBlackMarket.esp\",\"0x952C05|AchBlackMarket.esp\"]},\"IS\":[\"NonEssential\"]}}")
+    Acheron.AddOption(CaptureOptionID, "Capture", "AchMarket_CaptureIcon.swf", "{\"Target\":{\"NOT\":{\"Keywords\":[\"0x952C07|AchMarket.esp\",\"0x952C05|AchMarket.esp\"]},\"IS\":[\"NonEssential\"]}}")
   EndIf
   Acheron.RegisterForHunterPrideSelect(self)
   RegisterForModEvent("AchMarket_SELECT", "OnCaptureSelect")
